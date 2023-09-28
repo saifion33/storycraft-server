@@ -67,3 +67,27 @@ export const getAllStories = async (req, res) => {
         res.status(500).json({ message: 'Internal Server Error' });
     }
 }
+
+export const saveStory = async (req, res) => {
+    const { storyId } = req.body;
+    const userId = req.userId;
+    try {
+        const user = await User.findById(userId);
+        if (!user) {
+            return res.status(404).json({ message: 'User account not found' });
+        }
+        if (user.savedStories.includes(storyId)) {
+            user.savedStories = user.savedStories.filter(id => id !== storyId);
+            await user.save();
+            return res.status(200).json({ message: 'unsaved successfully.' })
+        } else {
+            user.savedStories.push(storyId)
+            await user.save()
+            res.status(200).json({ message: 'saved successfully.' })
+        }
+        
+    } catch (error) {
+        console.log(error)
+        res.status(500).json({ message: 'Internal Server Error.' })
+    }
+}

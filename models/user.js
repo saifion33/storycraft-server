@@ -6,6 +6,7 @@ const userSchema = mongoose.Schema({
     password: { type: String, required: true },
     noOfStories: { type: Number, default: 0 },
     noOfVotes: { type: Number, default: 0},
+    savedStories:{type:[String],default:[]},
     joindedAt: { type: Date, default: Date.now },
 })
 
