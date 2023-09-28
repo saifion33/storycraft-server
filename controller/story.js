@@ -91,3 +91,19 @@ export const saveStory = async (req, res) => {
         res.status(500).json({ message: 'Internal Server Error.' })
     }
 }
+
+export const getSavedStories=async(req,res)=>{
+    const userId=req.userId;
+    try {
+        const user=await User.findById(userId);
+        if (!user) {
+            return res.status(404).json({ message: 'User account not found.'});
+        }
+        const savedStories = user.savedStories
+        const stories=await Story.find({_id:{$in:savedStories}})
+        res.status(200).json({message:'Stories found.',stories});
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({message:'Internal Server Error'});
+    }
+}
