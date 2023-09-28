@@ -85,25 +85,53 @@ export const saveStory = async (req, res) => {
             await user.save()
             res.status(200).json({ message: 'saved successfully.' })
         }
-        
+
     } catch (error) {
         console.log(error)
         res.status(500).json({ message: 'Internal Server Error.' })
     }
 }
 
-export const getSavedStories=async(req,res)=>{
-    const userId=req.userId;
+export const getSavedStories = async (req, res) => {
+    const userId = req.userId;
     try {
-        const user=await User.findById(userId);
+        const user = await User.findById(userId);
         if (!user) {
-            return res.status(404).json({ message: 'User account not found.'});
+            return res.status(404).json({ message: 'User account not found.' });
         }
         const savedStories = user.savedStories
-        const stories=await Story.find({_id:{$in:savedStories}})
-        res.status(200).json({message:'Stories found.',stories});
+        const stories = await Story.find({ _id: { $in: savedStories } })
+        res.status(200).json({ message: 'Stories found.', stories });
     } catch (error) {
         console.log(error);
-        res.status(500).json({message:'Internal Server Error'});
+        res.status(500).json({ message: 'Internal Server Error' });
+    }
+}
+
+export const upvoteStory = async (req, res) => {
+    const { storyId } = req.body;
+    const userId = req.userId
+    try {
+        const user = await User.findById(userId);
+        if (!user) {
+            return res.status(404).json({ message: 'User account not found.' })
+        }
+        const story = await Story.findById(storyId);
+        if (!story) {
+            return res.status(404).json({ message: 'Story not found.' })
+        }
+
+        if (story.upVotes.includes(userId)) {
+            story.upVotes = story.upVotes.filter(id => id !== userId)
+            await story.save();
+            return res.status(200).json({ message: 'upvote removed successfully.' })
+        } else {
+            story.upVotes.push(userId);
+            await story.save();
+            res.status(200).json({ message: 'upvote added successfully' });
+        }
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({ message: 'Internal Server Error.' })
     }
 }
