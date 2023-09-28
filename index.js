@@ -1,8 +1,10 @@
 import express from 'express';
 import dotenv from 'dotenv';
 import cors from 'cors'
+import OpenAI from 'openai'
 import mongoose from 'mongoose'
 import authRouter from './router/auth.js';
+import storyRouter from './router/story.js';
 
 const app = express();
 app.use(cors())
@@ -11,8 +13,13 @@ app.use(express.json());
 
 dotenv.config()
 const PORT = process.env.PORT || 3000
+export const openai = new OpenAI({
+    apiKey: process.env.OPENAI_API_KEY
+  });
 
+  
 app.use('/auth',authRouter)
+app.use('/story',storyRouter)
 
 const connectDB = async () => {
     try {
