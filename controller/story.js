@@ -135,3 +135,32 @@ export const upvoteStory = async (req, res) => {
         res.status(500).json({ message: 'Internal Server Error.' })
     }
 }
+
+export const deleteStory = async (req, res) => {
+    const storyId = req.params.storyId;
+    const userId = req.userId;
+    try {
+        const response = await Promise.all([
+            await Story.findById(storyId),
+            await User.findById(userId)
+        ])
+        const story = response[0]
+        const user = response[1]
+        if (!story) {
+            return res.status(404).json({ message: 'Story not found.' })
+        }
+        if (!user) {
+            return res.status(404).json({ message: 'User account not found.' })
+        }
+        if (story.author._id != userId) {
+            return res.status(401).json({ message: "User don't have permission to delete this story." })
+        }
+        await Story.findByIdAndDelete(story._id)
+        user.noOfStories -= 1;
+        await user.save();
+        res.status(200).json({ message: 'Story deleted successfully.' })
+    } catch (error) {
+        console.log(error)
+        res.status(500).json({ message: 'Internal Server Error' });
+    }
+}
