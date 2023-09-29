@@ -1,6 +1,7 @@
 import User from '../models/user.js';
 import Story from '../models/story.js';
 import { openai } from '../index.js';
+import mongoose from 'mongoose';
 
 const generateStoryAi = async (userPrompt) => {
     // "prompt":"generate a short story with a title, about a smart hacker."
@@ -123,11 +124,15 @@ export const upvoteStory = async (req, res) => {
 
         if (story.upVotes.includes(userId)) {
             story.upVotes = story.upVotes.filter(id => id !== userId)
+            user.noOfVotes-=1;
             await story.save();
+            await user.save();
             return res.status(200).json({ message: 'upvote removed successfully.' })
         } else {
             story.upVotes.push(userId);
+            user.noOfVotes+=1;
             await story.save();
+            await user.save();
             res.status(200).json({ message: 'upvote added successfully' });
         }
     } catch (error) {
@@ -162,5 +167,22 @@ export const deleteStory = async (req, res) => {
     } catch (error) {
         console.log(error)
         res.status(500).json({ message: 'Internal Server Error' });
+    }
+}
+
+export const getStoryById = async (req, res) => {
+    const storyId = req.params.storyId;
+    if (!mongoose.Types.ObjectId.isValid(storyId)) {
+        return res.status(403).json({message:'Invalid Story Id'})
+    }
+    try {
+        const story = await Story.findById(storyId);
+        if (!story) {
+            return res.status(404).json({ message: 'Story not found' });
+        }
+        res.status(200).json({ message: 'Story found', story });
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({message:'Internal Server Error'})
     }
 }
