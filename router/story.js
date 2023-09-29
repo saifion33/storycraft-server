@@ -5,11 +5,11 @@ import { deleteStory, generateStory, getAllStories, getSavedStories, getStoryByI
 const router=express.Router();
 
 router.get('/all',getAllStories)
-router.get('/:storyId',getStoryById)
 router.patch('/save',auth,saveStory)
 router.patch('/upvote',auth,upvoteStory)
 router.post('/generate',auth,generateStory)
 router.get('/getSaved',auth,getSavedStories)
+router.get('/:storyId',getStoryById)
 router.delete('/delete/:storyId',auth,deleteStory)
 
 
